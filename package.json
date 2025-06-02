@@ -1,8 +1,10 @@
 {
   "name": "trello-mcp",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "main": "index.js",
   "type": "module",
+  "author": "Burlet Mederic <mederic.burlet@gmail.com>",
+  "license": "Apache-2.0",
   "bin": {
     "trello-mcp": "./build/index.js"
   },
@@ -12,10 +14,16 @@
   "files": [
     "build"
   ],
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "trello",
+    "mcp",
+    "modelcontextprotocol",
+    "sdk",
+    "api",
+    "typescript",
+    "nodejs"
+  ],
+  "description": "A Model Context Protocol (MCP) SDK for Trello, allowing interaction with Trello's API using the MCP standard.",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
     "dotenv": "^16.5.0",
