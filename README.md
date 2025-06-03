@@ -20,13 +20,21 @@ npm install
 
 ### 2. Setup Trello Credentials
 
-1. Get your API key from https://trello.com/app-key
-2. Generate a token using the link provided on the API key page
-3. Create a `.env` file (use `.env.example` as template):
+To connect to Trello, you'll need both an API key and a token. Follow the [Trello REST API Guide](https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/) for detailed information about the Trello API.
+
+1. **Get your API key** from https://trello.com/app-key
+2. **Generate a token** using the link provided on the API key page
+3. **Create a `.env` file** (use `.env.example` as template):
 
 ```bash
 TRELLO_API_KEY=your_api_key_here
 TRELLO_TOKEN=your_token_here
+```
+
+4. **Find your working board ID** by running the `list-my-boards` tool after setup, then add it to your `.env`:
+
+```bash
+TRELLO_WORKING_BOARD_ID=your_working_board_id_here
 ```
 
 ### 3. Build and Run
@@ -36,6 +44,24 @@ npm run build
 node build/index.js
 ```
 
+### 4. Configure in VS Code
+
+After building the project, you can add the MCP server to your VS Code configuration by updating your settings:
+
+```json
+"mcp": {
+  "servers": {
+    "trello-mcp": {
+      "command": "node",
+      "args": ["/path/to/trello-mcp/build/index.js"],
+      "env": {}
+    }
+  }
+}
+```
+
+Replace `/path/to/trello-mcp` with the actual path to your project directory.
+
 ## Available Tools
 
 ### `about-me`
@@ -44,6 +70,13 @@ Test tool that retrieves and displays your Trello boards. Perfect for validating
 
 **Usage**: Call through your MCP client
 **Returns**: List of your Trello boards with details
+
+### `list-my-boards`
+
+Lists all Trello boards accessible to the authenticated user. Use this tool to find your working board ID.
+
+**Usage**: Call through your MCP client
+**Returns**: Complete list of accessible boards with their IDs, names, and URLs
 
 ### `update-card`
 
@@ -125,6 +158,7 @@ npm run build
 
 ## Documentation
 
+- [Trello REST API Guide](https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/) - Official Trello API documentation
 - [Trello Usage Guide](docs/TRELLO_USAGE.md) - Detailed usage and examples
 - [Implementation Plan](docs/features/001-trello-api-helper-service.md) - Technical implementation details
 - [User Story](docs/stories/001-trello-api-helper-service-story.md) - Original requirements
