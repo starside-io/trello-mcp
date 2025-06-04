@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { ToolDefinition, tools } from "../types.js";
 import { TrelloApiService } from "../../services/trello-api.js";
+import { generateToolErrorResponse } from "../../utils/trello-error-handler.js";
 
 const getCardTool: ToolDefinition = {
   name: "get-card",
@@ -26,6 +27,7 @@ const getCardTool: ToolDefinition = {
       try {
         card = await trelloService.get(`/cards/${cardId}`);
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return {
           content: [
             {
@@ -38,9 +40,7 @@ const getCardTool: ToolDefinition = {
                 `1. Verify the card ID is correct\n` +
                 `2. Use the get-cards-for-list or get-all-cards-for-each-list tools to find valid card IDs\n` +
                 `3. Check that you have access to the board containing this card\n\n` +
-                `**Error details:** ${
-                  error instanceof Error ? error.message : "Unknown error"
-                }`,
+                `**Error details:** ${errorMessage}`,
             },
           ],
         };
@@ -141,20 +141,9 @@ const getCardTool: ToolDefinition = {
         ],
       };
     } catch (error) {
-      return {
-        content: [
-          {
-            type: "text",
-            text:
-              `# Error Retrieving Card\n\n` +
-              `❌ **An unexpected error occurred while retrieving the card**\n\n` +
-              `Please check your API credentials and try again.\n\n` +
-              `**Error details:** ${
-                error instanceof Error ? error.message : "Unknown error"
-              }`,
-          },
-        ],
-      };
+      return generateToolErrorResponse(error, "markdown", {
+        toolName: "get-card"
+      });
     }
   },
 };
