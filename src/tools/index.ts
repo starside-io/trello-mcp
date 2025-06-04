@@ -10,6 +10,7 @@ import "./debug-trello.js";
 import "./boards/index.js";
 import "./lists/index.js";
 import "./cards/index.js";
+import "./checklists/index.js";
 
 // Export the tools array which contains all registered tools
 export { tools } from "./types.js";

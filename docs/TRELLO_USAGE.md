@@ -363,6 +363,74 @@ Parameters:
    }
    ```
 
+#### create-checklist Tool
+
+Creates a new checklist for a specific Trello card with optional name and position.
+
+**Usage:** Call the `create-checklist` tool through your MCP client
+
+**Parameters:**
+
+- `cardId` (required): The ID of the Trello card to add the checklist to (24-character hexadecimal string)
+- `name` (optional): Name for the new checklist (defaults to "Checklist" if not provided)
+- `pos` (optional): Position of the checklist. Use 'top', 'bottom', or a positive number
+
+**Returns:**
+
+- Created checklist information with complete details
+- Success/failure status with detailed error messages
+- Suggestions for resolving errors when they occur
+
+**Example Usage - Create Basic Checklist:**
+
+```
+Tool: create-checklist
+Parameters:
+  cardId: "7a8b9c1d2e3f4a5b6c7d8e9f"
+```
+
+**Example Usage - Create Named Checklist:**
+
+```
+Tool: create-checklist
+Parameters:
+  cardId: "7a8b9c1d2e3f4a5b6c7d8e9f"
+  name: "Project Tasks"
+  pos: "top"
+```
+
+**Example Success Response:**
+
+```json
+{
+  "success": true,
+  "message": "Checklist \"Project Tasks\" created successfully",
+  "checklistId": "8b9c1d2e3f4a5b6c7d8e9f1a",
+  "checklistName": "Project Tasks",
+  "cardId": "7a8b9c1d2e3f4a5b6c7d8e9f",
+  "position": 16384,
+  "checklist": {
+    "id": "8b9c1d2e3f4a5b6c7d8e9f1a",
+    "name": "Project Tasks",
+    "idCard": "7a8b9c1d2e3f4a5b6c7d8e9f",
+    "idBoard": "6f8c9d1e2f3a4b5c6d7e8f9a",
+    "pos": 16384,
+    "checkItems": []
+  }
+}
+```
+
+**Example Error Response:**
+
+```json
+{
+  "success": false,
+  "error": "Card not found",
+  "message": "The specified card ID does not exist or you don't have access to it.",
+  "suggestion": "Use get-all-cards-for-each-list or get-cards-for-list tools to find valid card IDs."
+}
+```
+
 ## API Usage Examples
 
 ### Using the Service Directly
