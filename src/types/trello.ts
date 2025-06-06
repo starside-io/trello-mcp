@@ -118,3 +118,86 @@ export interface CardUpdateResponse {
   changes?: string[];
   errors?: ValidationError[];
 }
+
+// Trello Checklist Item interface
+export interface TrelloChecklistItem {
+  id: string;
+  name: string;
+  state: "complete" | "incomplete";
+  pos: number;
+  due?: string;
+  dueReminder?: number;
+  idMember?: string;
+  idChecklist: string;
+}
+
+// Trello Checklist interface
+export interface TrelloChecklist {
+  id: string;
+  name: string;
+  idBoard: string;
+  idCard: string;
+  pos: number;
+  checkItems: TrelloChecklistItem[];
+}
+
+// Checklist Item Creation Parameters interface
+export interface ChecklistItemCreateParameters {
+  checklistId: string; // Required parameter
+  name: string; // Required parameter
+  pos?: string | number; // "top", "bottom", or numeric position
+  checked?: boolean; // Whether the item is checked
+  due?: string; // ISO 8601 date string
+  dueReminder?: number; // Due reminder in minutes
+  idMember?: string; // Member ID
+}
+
+// Checklist Item Creation Response interface
+export interface ChecklistItemCreateResponse {
+  success: boolean;
+  checklistItem?: TrelloChecklistItem;
+  checklistId?: string;
+  cardId?: string;
+  errors?: ValidationError[];
+}
+
+// Batch Checklist Item Parameters interface
+export interface BatchChecklistItemParameters {
+  checklistId: string; // Required parameter
+  items: ChecklistItemForBatch[]; // Array of items to create
+}
+
+// Individual item in batch (without checklistId since it's at parent level)
+export interface ChecklistItemForBatch {
+  name: string; // Required parameter
+  pos?: string | number; // "top", "bottom", or numeric position
+  checked?: boolean; // Whether the item is checked
+  due?: string; // ISO 8601 date string
+  dueReminder?: number; // Due reminder in minutes
+  idMember?: string; // Member ID
+}
+
+// Batch operation result for individual item
+export interface BatchItemResult {
+  index: number;
+  success: boolean;
+  item: ChecklistItemForBatch;
+  result?: TrelloChecklistItem;
+  error?: string;
+}
+
+// Batch operation summary
+export interface BatchOperationSummary {
+  total: number;
+  successful: number;
+  failed: number;
+  checklistId: string;
+}
+
+// Batch Checklist Item Creation Response interface
+export interface BatchChecklistItemCreateResponse {
+  success: boolean;
+  summary: BatchOperationSummary;
+  results: BatchItemResult[];
+  errors?: ValidationError[];
+}
