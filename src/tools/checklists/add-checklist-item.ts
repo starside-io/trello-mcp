@@ -2,6 +2,7 @@ import { z } from "zod";
 import { ToolDefinition, tools } from "../types.js";
 import { TrelloApiService } from "../../services/trello-api.js";
 import { ChecklistValidation } from "../../utils/checklist-validation.js";
+import { generateToolErrorResponse } from "../../utils/trello-error-handler.js";
 
 const addChecklistItemTool: ToolDefinition = {
   name: "add-checklist-item",
@@ -94,87 +95,16 @@ const addChecklistItemTool: ToolDefinition = {
           requestBody
         );
       } catch (error) {
-        // Handle different types of API errors
-        let errorResponse: any;
-
-        if (error instanceof Error) {
-          const errorMessage = error.message.toLowerCase();
-
-          if (
-            errorMessage.includes("not found") ||
-            errorMessage.includes("404")
-          ) {
-            errorResponse = {
-              success: false,
-              error: "Checklist not found",
-              message:
-                "The specified checklist ID does not exist or you don't have access to it.",
-              suggestion:
-                "Use create-checklist tool first to create a checklist, or verify the checklist ID.",
-            };
-          } else if (
-            errorMessage.includes("unauthorized") ||
-            errorMessage.includes("401")
-          ) {
-            errorResponse = {
-              success: false,
-              error: "Permission denied",
-              message: "You don't have permission to add items to this checklist.",
-              suggestion: "Ensure you have write access to the board and card.",
-            };
-          } else if (
-            errorMessage.includes("invalid") &&
-            (errorMessage.includes("checklist") || errorMessage.includes("id"))
-          ) {
-            errorResponse = {
-              success: false,
-              error: "Invalid checklist ID",
-              message: "The specified checklist ID is invalid or doesn't exist.",
-              suggestion: "Use create-checklist tool or get checklist IDs from cards.",
-            };
-          } else if (
-            errorMessage.includes("rate limit") ||
-            errorMessage.includes("429")
-          ) {
-            errorResponse = {
-              success: false,
-              error: "Rate limit exceeded",
-              message: "Too many API requests. Please wait before trying again.",
-              suggestion: "Wait a few moments and retry your request.",
-            };
-          } else if (
-            errorMessage.includes("bad request") ||
-            errorMessage.includes("400")
-          ) {
-            errorResponse = {
-              success: false,
-              error: "Bad request",
-              message: "The request parameters are invalid or malformed.",
-              suggestion: "Check your parameters and ensure they meet the API requirements.",
-            };
-          } else {
-            errorResponse = {
-              success: false,
-              error: "Checklist item creation failed",
-              message: error.message,
-              suggestion:
-                "Please check the checklist ID and parameters, then try again.",
-            };
-          }
-        } else {
-          errorResponse = {
-            success: false,
-            error: "Unknown error",
-            message: "An unexpected error occurred while creating the checklist item.",
-            suggestion: "Please check your API credentials and try again.",
-          };
-        }
-
-        return {
-          content: [
-            { type: "text", text: JSON.stringify(errorResponse, null, 2) },
-          ],
-        };
+        return generateToolErrorResponse(error, "json", {
+          toolName: "add-checklist-item",
+          resourceType: "checklist",
+          resourceId: checklistId,
+          troubleshootingSteps: [
+            "Verify the checklist ID exists and you have access to it",
+            "Check that your API credentials are valid", 
+            "Use get-checklists-for-card tool to find valid checklist IDs"
+          ]
+        });
       }
 
       // Format successful response
@@ -207,20 +137,10 @@ const addChecklistItemTool: ToolDefinition = {
         content: [{ type: "text", text: responseText }],
       };
     } catch (error) {
-      return {
-        content: [
-          {
-            type: "text",
-            text:
-              `# Error Creating Checklist Item\n\n` +
-              `❌ **An unexpected error occurred while creating the checklist item**\n\n` +
-              `Please check your API credentials and try again.\n\n` +
-              `**Error details:** ${
-                error instanceof Error ? error.message : "Unknown error"
-              }`,
-          },
-        ],
-      };
+      return generateToolErrorResponse(error, "markdown", {
+        toolName: "add-checklist-item",
+        additionalInfo: "This tool allows you to add items to existing Trello checklists."
+      });
     }
   },
 };

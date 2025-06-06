@@ -1,5 +1,6 @@
 import { ToolDefinition, tools } from "./types.js";
 import { TrelloApiService } from "../services/trello-api.js";
+import { generateToolErrorResponse } from "../utils/trello-error-handler.js";
 
 const aboutMeTool: ToolDefinition = {
   name: "about-me",
@@ -51,47 +52,18 @@ const aboutMeTool: ToolDefinition = {
         ],
       };
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-
-      // Provide helpful error messages without exposing credentials
-      let userFriendlyMessage = "Failed to retrieve Trello information.";
-
-      if (
-        errorMessage.includes("credentials") ||
-        errorMessage.includes("401")
-      ) {
-        userFriendlyMessage =
-          "Authentication failed. Please check your TRELLO_API_KEY and TRELLO_TOKEN environment variables.";
-      } else if (
-        errorMessage.includes("network") ||
-        errorMessage.includes("fetch")
-      ) {
-        userFriendlyMessage =
-          "Network error. Please check your internet connection and try again.";
-      } else if (errorMessage.includes("environment")) {
-        userFriendlyMessage =
-          "Missing environment variables. Please set TRELLO_API_KEY and TRELLO_TOKEN.";
-      }
-
-      return {
-        content: [
-          {
-            type: "text",
-            text:
-              `# Trello API Error\n\n❌ **${userFriendlyMessage}**\n\n` +
-              `**Technical Details:** ${errorMessage}\n\n` +
-              `## Setup Instructions:\n` +
-              `1. Get your API key from: https://trello.com/app-key\n` +
-              `2. Generate a token by visiting the token URL shown on the API key page\n` +
-              `3. Set environment variables:\n` +
-              `   - TRELLO_API_KEY=your_api_key_here\n` +
-              `   - TRELLO_TOKEN=your_token_here\n` +
-              `4. Restart the MCP server\n\n` +
-              `*This tool tests the Trello API Helper Service integration*`,
-          },
+      return generateToolErrorResponse(error, "markdown", {
+        toolName: "about-me",
+        resourceType: "user",
+        troubleshootingSteps: [
+          "Get your API key from: https://trello.com/app-key",
+          "Generate a token by visiting the token URL shown on the API key page",
+          "Set environment variables: TRELLO_API_KEY and TRELLO_TOKEN",
+          "Restart the MCP server"
         ],
-      };
+        troubleshootingTitle: "Setup Instructions",
+        additionalInfo: "*This tool tests the Trello API Helper Service integration*"
+      });
     }
   },
 };

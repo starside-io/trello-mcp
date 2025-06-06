@@ -2,6 +2,7 @@ import { z } from "zod";
 import { ToolDefinition, tools } from "../types.js";
 import { TrelloApiService } from "../../services/trello-api.js";
 import { ChecklistValidation } from "../../utils/checklist-validation.js";
+import { generateToolErrorResponse } from "../../utils/trello-error-handler.js";
 
 // Define the schema for individual checklist items in the batch
 const checklistItemSchema = z.object({
@@ -220,29 +221,17 @@ const batchAddChecklistItemsTool: ToolDefinition = {
       };
 
     } catch (error) {
-      // Handle unexpected errors
-      let errorMessage = "An unexpected error occurred during batch processing";
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-
-      return {
-        content: [
-          {
-            type: "text",
-            text:
-              `# ❌ Batch Processing Failed\n\n` +
-              `**Error**: ${errorMessage}\n\n` +
-              `## Troubleshooting\n` +
-              `- Verify your Trello API credentials are valid\n` +
-              `- Check that the checklist ID exists and you have access to it\n` +
-              `- Ensure your network connection is stable\n` +
-              `- Try with a smaller batch size if the error persists\n\n` +
-              `Use the \`debug-trello\` tool to test your connection and credentials.`,
-          },
+      return generateToolErrorResponse(error, "markdown", {
+        toolName: "batch-add-checklist-items",
+        resourceType: "checklist",
+        troubleshootingSteps: [
+          "Verify your Trello API credentials are valid",
+          "Check that the checklist ID exists and you have access to it",
+          "Ensure your network connection is stable",
+          "Try with a smaller batch size if the error persists"
         ],
-      };
+        additionalInfo: "Use the `debug-trello` tool to test your connection and credentials."
+      });
     }
   },
 };

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { ToolDefinition, tools } from "../types.js";
 import { TrelloApiService } from "../../services/trello-api.js";
+import { generateToolErrorResponse } from "../../utils/trello-error-handler.js";
 
 const createChecklistTool: ToolDefinition = {
   name: "create-checklist",
@@ -61,77 +62,16 @@ const createChecklistTool: ToolDefinition = {
       try {
         checklist = await trelloService.post("/checklists", requestBody);
       } catch (error) {
-        // Handle different types of API errors
-        let errorResponse: any;
-
-        if (error instanceof Error) {
-          const errorMessage = error.message.toLowerCase();
-
-          if (
-            errorMessage.includes("not found") ||
-            errorMessage.includes("404")
-          ) {
-            errorResponse = {
-              success: false,
-              error: "Card not found",
-              message:
-                "The specified card ID does not exist or you don't have access to it.",
-              suggestion:
-                "Use get-all-cards-for-each-list or get-cards-for-list tools to find valid card IDs.",
-            };
-          } else if (
-            errorMessage.includes("unauthorized") ||
-            errorMessage.includes("401")
-          ) {
-            errorResponse = {
-              success: false,
-              error: "Permission denied",
-              message: "You don't have permission to create checklists on this card.",
-              suggestion: "Ensure you have write access to the board and card.",
-            };
-          } else if (
-            errorMessage.includes("invalid") &&
-            errorMessage.includes("card")
-          ) {
-            errorResponse = {
-              success: false,
-              error: "Invalid card ID",
-              message: "The specified card ID is invalid or doesn't exist.",
-              suggestion: "Use get-cards-for-list tool to find valid card IDs.",
-            };
-          } else if (
-            errorMessage.includes("rate limit") ||
-            errorMessage.includes("429")
-          ) {
-            errorResponse = {
-              success: false,
-              error: "Rate limit exceeded",
-              message: "Too many API requests. Please wait before trying again.",
-              suggestion: "Wait a few moments and retry your request.",
-            };
-          } else {
-            errorResponse = {
-              success: false,
-              error: "Checklist creation failed",
-              message: error.message,
-              suggestion:
-                "Please check the card ID and parameters, then try again.",
-            };
-          }
-        } else {
-          errorResponse = {
-            success: false,
-            error: "Unknown error",
-            message: "An unexpected error occurred while creating the checklist.",
-            suggestion: "Please check your API credentials and try again.",
-          };
-        }
-
-        return {
-          content: [
-            { type: "text", text: JSON.stringify(errorResponse, null, 2) },
-          ],
-        };
+        return generateToolErrorResponse(error, "json", {
+          toolName: "create-checklist",
+          resourceType: "card",
+          resourceId: cardId,
+          troubleshootingSteps: [
+            "Verify the card ID exists and you have access to it",
+            "Check that your API credentials are valid",
+            "Use get-cards-for-list tool to find valid card IDs"
+          ]
+        });
       }
 
       // Format successful response
@@ -160,20 +100,10 @@ const createChecklistTool: ToolDefinition = {
         content: [{ type: "text", text: responseText }],
       };
     } catch (error) {
-      return {
-        content: [
-          {
-            type: "text",
-            text:
-              `# Error Creating Checklist\n\n` +
-              `❌ **An unexpected error occurred while creating the checklist**\n\n` +
-              `Please check your API credentials and try again.\n\n` +
-              `**Error details:** ${
-                error instanceof Error ? error.message : "Unknown error"
-              }`,
-          },
-        ],
-      };
+      return generateToolErrorResponse(error, "markdown", {
+        toolName: "create-checklist",
+        additionalInfo: "This tool allows you to create new checklists for Trello cards."
+      });
     }
   },
 };

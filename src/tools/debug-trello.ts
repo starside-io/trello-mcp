@@ -1,5 +1,6 @@
 import { ToolDefinition, tools } from "./types.js";
 import { TrelloApiService } from "../services/trello-api.js";
+import { generateToolErrorResponse } from "../utils/trello-error-handler.js";
 
 const debugTrelloTool: ToolDefinition = {
   name: "debug-trello",
@@ -74,16 +75,10 @@ const debugTrelloTool: ToolDefinition = {
         ],
       };
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      return {
-        content: [
-          {
-            type: "text",
-            text: `# Debug Tool Error\n\n❌ **${errorMessage}**`,
-          },
-        ],
-      };
+      return generateToolErrorResponse(error, "markdown", {
+        toolName: "debug-trello",
+        additionalInfo: "This debug tool helps test your Trello API connection."
+      });
     }
   },
 };
