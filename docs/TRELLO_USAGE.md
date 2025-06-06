@@ -492,6 +492,123 @@ Parameters:
 
 Similar to create-checklist tool - provides detailed error messages for invalid card IDs, access issues, etc.
 
+#### update-checkitem Tool
+
+Updates a checkitem on a Trello card with support for changing name, state, position, and moving between checklists.
+
+**Usage:** Call the `update-checkitem` tool through your MCP client
+
+**Parameters:**
+
+- `cardId` (required): The ID of the Trello card containing the checkitem (24-character hexadecimal string)
+- `checkitemId` (required): The ID of the checkitem to update (24-character hexadecimal string)
+- `name` (optional): New name for the checkitem
+- `state` (optional): State of the checkitem ('complete' or 'incomplete')
+- `idChecklist` (optional): ID of the checklist to move the checkitem to (24-character hexadecimal string)
+- `pos` (optional): Position of the checkitem. Use 'top', 'bottom', or a positive number
+
+**Returns:**
+
+- Updated checkitem information with complete details
+- Summary of changes made
+- Success/failure status with detailed error messages
+- Suggestions for resolving errors when they occur
+
+**Example Usage - Mark Checkitem as Complete:**
+
+```
+Tool: update-checkitem
+Parameters:
+  cardId: "7a8b9c1d2e3f4a5b6c7d8e9f"
+  checkitemId: "8b9c1d2e3f4a5b6c7d8e9f1a"
+  state: "complete"
+```
+
+**Example Usage - Rename and Reposition Checkitem:**
+
+```
+Tool: update-checkitem
+Parameters:
+  cardId: "7a8b9c1d2e3f4a5b6c7d8e9f"
+  checkitemId: "8b9c1d2e3f4a5b6c7d8e9f1a"
+  name: "Updated task description"
+  pos: "top"
+```
+
+**Example Usage - Move Checkitem to Different Checklist:**
+
+```
+Tool: update-checkitem
+Parameters:
+  cardId: "7a8b9c1d2e3f4a5b6c7d8e9f"
+  checkitemId: "8b9c1d2e3f4a5b6c7d8e9f1a"
+  idChecklist: "9c1d2e3f4a5b6c7d8e9f1a2b"
+```
+
+**Example Success Response:**
+
+```json
+{
+  "success": true,
+  "message": "Checkitem \"Updated task description\" updated successfully",
+  "checkitemId": "8b9c1d2e3f4a5b6c7d8e9f1a",
+  "checkitemName": "Updated task description",
+  "cardId": "7a8b9c1d2e3f4a5b6c7d8e9f",
+  "state": "complete",
+  "position": 16384,
+  "checklistId": "9c1d2e3f4a5b6c7d8e9f1a2b",
+  "changes": [
+    "name updated to \"Updated task description\"",
+    "state changed to \"complete\"",
+    "position changed to 16384"
+  ],
+  "updatedCheckitem": {
+    "id": "8b9c1d2e3f4a5b6c7d8e9f1a",
+    "name": "Updated task description",
+    "state": "complete",
+    "pos": 16384,
+    "due": null,
+    "dueReminder": null,
+    "idMember": null,
+    "idChecklist": "9c1d2e3f4a5b6c7d8e9f1a2b",
+    "idCard": "7a8b9c1d2e3f4a5b6c7d8e9f"
+  }
+}
+```
+
+**Example Error Response:**
+
+```json
+{
+  "success": false,
+  "error": "Checkitem not found",
+  "message": "The specified checkitem ID does not exist on the specified card or you don't have access to it.",
+  "suggestion": "Use get-checklists-for-card tool to find valid checkitem IDs."
+}
+```
+
+**Common Update Patterns:**
+
+1. **Mark checkitem as complete:**
+   ```
+   Parameters: { cardId: "...", checkitemId: "...", state: "complete" }
+   ```
+
+2. **Rename a checkitem:**
+   ```
+   Parameters: { cardId: "...", checkitemId: "...", name: "New task name" }
+   ```
+
+3. **Move checkitem to top of list:**
+   ```
+   Parameters: { cardId: "...", checkitemId: "...", pos: "top" }
+   ```
+
+4. **Move checkitem to different checklist:**
+   ```
+   Parameters: { cardId: "...", checkitemId: "...", idChecklist: "new_checklist_id" }
+   ```
+
 ## API Usage Examples
 
 ### Using the Service Directly
