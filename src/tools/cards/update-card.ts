@@ -2,6 +2,7 @@ import { z } from "zod";
 import { ToolDefinition, tools } from "../types.js";
 import { TrelloApiService } from "../../services/trello-api.js";
 import { CardValidation } from "../../utils/card-validation.js";
+import { generateToolErrorResponse } from "../../utils/trello-error-handler.js";
 
 const updateCardTool: ToolDefinition = {
   name: "update-card",
@@ -196,88 +197,10 @@ const updateCardTool: ToolDefinition = {
         content: [{ type: "text", text: responseText }],
       };
     } catch (error) {
-      // Handle different types of API errors
-      let errorResponse: any;
-
-      if (error instanceof Error) {
-        const errorMessage = error.message.toLowerCase();
-
-        if (
-          errorMessage.includes("not found") ||
-          errorMessage.includes("404")
-        ) {
-          errorResponse = {
-            success: false,
-            error: "Card not found",
-            message:
-              "The specified card ID does not exist or you don't have access to it.",
-            suggestion:
-              "Use get-all-cards-for-each-list or get-cards-for-list tools to find valid card IDs.",
-          };
-        } else if (
-          errorMessage.includes("unauthorized") ||
-          errorMessage.includes("401")
-        ) {
-          errorResponse = {
-            success: false,
-            error: "Permission denied",
-            message: "You don't have permission to update this card.",
-            suggestion: "Ensure you have write access to the board and card.",
-          };
-        } else if (
-          errorMessage.includes("invalid") &&
-          errorMessage.includes("list")
-        ) {
-          errorResponse = {
-            success: false,
-            error: "Invalid list ID",
-            message: "The specified list ID is invalid or doesn't exist.",
-            suggestion: "Use get-board-lists tool to find valid list IDs.",
-          };
-        } else if (
-          errorMessage.includes("invalid") &&
-          errorMessage.includes("board")
-        ) {
-          errorResponse = {
-            success: false,
-            error: "Invalid board ID",
-            message: "The specified board ID is invalid or doesn't exist.",
-            suggestion: "Use list-my-boards tool to find valid board IDs.",
-          };
-        } else if (
-          errorMessage.includes("rate limit") ||
-          errorMessage.includes("429")
-        ) {
-          errorResponse = {
-            success: false,
-            error: "Rate limit exceeded",
-            message: "Too many API requests. Please wait before trying again.",
-            suggestion: "Wait a few moments and retry your request.",
-          };
-        } else {
-          errorResponse = {
-            success: false,
-            error: "Update failed",
-            message: error.message,
-            suggestion:
-              "Please check the card ID and parameters, then try again.",
-          };
-        }
-      } else {
-        errorResponse = {
-          success: false,
-          error: "Update failed",
-          message: "Unknown error occurred while updating the card.",
-          suggestion:
-            "Please check the card ID and parameters, then try again.",
-        };
-      }
-
-      return {
-        content: [
-          { type: "text", text: JSON.stringify(errorResponse, null, 2) },
-        ],
-      };
+      return generateToolErrorResponse(error, "json", {
+        resourceType: "card",
+        toolName: "update-card"
+      });
     }
   },
 };

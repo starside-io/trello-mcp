@@ -1,6 +1,7 @@
 import { ToolDefinition, tools } from "../types.js";
 import { TrelloApiService } from "../../services/trello-api.js";
 import { ConfigManager } from "../../utils/config.js";
+import { generateToolErrorResponse } from "../../utils/trello-error-handler.js";
 
 const getBoardListsTool: ToolDefinition = {
   name: "get-board-lists",
@@ -72,57 +73,17 @@ const getBoardListsTool: ToolDefinition = {
         ],
       };
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-
-      // Provide helpful error messages without exposing credentials
-      let userFriendlyMessage = "Failed to retrieve board lists.";
-
-      if (
-        errorMessage.includes("credentials") ||
-        errorMessage.includes("401")
-      ) {
-        userFriendlyMessage =
-          "Authentication failed. Please check your TRELLO_API_KEY and TRELLO_TOKEN environment variables.";
-      } else if (
-        errorMessage.includes("network") ||
-        errorMessage.includes("fetch")
-      ) {
-        userFriendlyMessage =
-          "Network error. Please check your internet connection and try again.";
-      } else if (errorMessage.includes("environment")) {
-        userFriendlyMessage =
-          "Missing environment variables. Please set TRELLO_API_KEY and TRELLO_TOKEN.";
-      } else if (
-        errorMessage.includes("404") ||
-        errorMessage.includes("not found")
-      ) {
-        userFriendlyMessage =
-          "Board not found or access denied. Please check your TRELLO_WORKING_BOARD_ID and ensure you have access to this board.";
-      } else if (
-        errorMessage.includes("403") ||
-        errorMessage.includes("forbidden")
-      ) {
-        userFriendlyMessage =
-          "Access forbidden. Please ensure you have permission to view this board's lists.";
-      }
-
-      return {
-        content: [
-          {
-            type: "text",
-            text:
-              `# Trello API Error\n\n❌ **${userFriendlyMessage}**\n\n` +
-              `**Technical Details:** ${errorMessage}\n\n` +
-              `## Troubleshooting:\n` +
-              `1. Verify your board ID with the list-my-boards tool\n` +
-              `2. Check that TRELLO_WORKING_BOARD_ID is correctly set\n` +
-              `3. Ensure you have access to the specified board\n` +
-              `4. Verify your API credentials are valid\n\n` +
-              `*This tool retrieves lists from your designated working board*`,
-          },
+      return generateToolErrorResponse(error, "markdown", {
+        resourceType: "board",
+        toolName: "get-board-lists",
+        troubleshootingSteps: [
+          "Verify your board ID with the list-my-boards tool",
+          "Check that TRELLO_WORKING_BOARD_ID is correctly set",
+          "Ensure you have access to the specified board",
+          "Verify your API credentials are valid"
         ],
-      };
+        additionalInfo: "*This tool retrieves lists from your designated working board*"
+      });
     }
   },
 };

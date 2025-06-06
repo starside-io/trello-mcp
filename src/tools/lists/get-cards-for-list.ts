@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { ToolDefinition, tools } from "../types.js";
 import { TrelloApiService } from "../../services/trello-api.js";
+import { generateToolErrorResponse } from "../../utils/trello-error-handler.js";
 
 const getCardsForListTool: ToolDefinition = {
   name: "get-cards-for-list",
@@ -25,10 +26,11 @@ const getCardsForListTool: ToolDefinition = {
       try {
         listInfo = await trelloService.get(`/lists/${listId}`);
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return {
           content: [
             {
-              type: "text",
+              type: "text", 
               text:
                 `# List Not Found\n\n` +
                 `❌ **Could not find list with ID: ${listId}**\n\n` +
@@ -37,9 +39,7 @@ const getCardsForListTool: ToolDefinition = {
                 `1. Verify the list ID is correct\n` +
                 `2. Use the get-board-lists tool to find valid list IDs\n` +
                 `3. Check that you have access to the board containing this list\n\n` +
-                `**Error details:** ${
-                  error instanceof Error ? error.message : "Unknown error"
-                }`,
+                `**Error details:** ${errorMessage}`,
             },
           ],
         };
@@ -50,6 +50,7 @@ const getCardsForListTool: ToolDefinition = {
       try {
         cards = await trelloService.get(`/lists/${listId}/cards`);
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return {
           content: [
             {
@@ -59,9 +60,7 @@ const getCardsForListTool: ToolDefinition = {
                 `❌ **Could not fetch cards for list: ${listInfo.name}**\n\n` +
                 `**List ID:** ${listId}\n\n` +
                 `You may not have access to the cards in this list.\n\n` +
-                `**Error details:** ${
-                  error instanceof Error ? error.message : "Unknown error"
-                }`,
+                `**Error details:** ${errorMessage}`,
             },
           ],
         };
@@ -144,21 +143,9 @@ const getCardsForListTool: ToolDefinition = {
         ],
       };
     } catch (error) {
-      return {
-        content: [
-          {
-            type: "text",
-            text:
-              `# Error\n\n` +
-              `❌ **Failed to retrieve cards for list**\n\n` +
-              `An unexpected error occurred while fetching cards.\n\n` +
-              `**Error:** ${
-                error instanceof Error ? error.message : "Unknown error"
-              }\n\n` +
-              `Please check your Trello API credentials and network connection.`,
-          },
-        ],
-      };
+      return generateToolErrorResponse(error, "markdown", {
+        toolName: "get-cards-for-list"
+      });
     }
   },
 };
