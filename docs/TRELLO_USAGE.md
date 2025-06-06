@@ -431,6 +431,67 @@ Parameters:
 }
 ```
 
+#### get-checklists-for-card Tool
+
+Gets all checklists for a specific Trello card by providing the card ID.
+
+**Usage:** Call the `get-checklists-for-card` tool through your MCP client
+
+**Parameters:**
+
+- `cardId` (required): The ID of the Trello card to get checklists from (24-character hexadecimal string)
+
+**Returns:**
+
+- List of all checklists associated with the card
+- Progress information for each checklist (completed/total items)
+- Detailed information about each checklist item
+- Clear indication if no checklists exist for the card
+
+**Example Usage:**
+
+```
+Tool: get-checklists-for-card
+Parameters:
+  cardId: "7a8b9c1d2e3f4a5b6c7d8e9f"
+```
+
+**Example Success Response:**
+
+```
+# Checklists for Card
+
+**Card ID:** 7a8b9c1d2e3f4a5b6c7d8e9f
+**Total Checklists:** 2
+
+## Checklists
+
+### 1. Project Setup
+
+**Checklist ID:** 8b9c1d2e3f4a5b6c7d8e9f1a
+**Position:** 16384
+**Progress:** 2/3 items completed (67%)
+
+**Items:**
+1. ✅ Create repository
+2. ✅ Setup development environment  
+3. ⏹️ Write initial documentation
+
+### 2. Testing Tasks
+
+**Checklist ID:** 9c1d2e3f4a5b6c7d8e9f1a2b
+**Position:** 32768
+**Progress:** 0/2 items completed (0%)
+
+**Items:**
+1. ⏹️ Write unit tests
+2. ⏹️ Setup CI/CD pipeline
+```
+
+**Example Error Response:**
+
+Similar to create-checklist tool - provides detailed error messages for invalid card IDs, access issues, etc.
+
 ## API Usage Examples
 
 ### Using the Service Directly
