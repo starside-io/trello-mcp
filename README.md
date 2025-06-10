@@ -122,7 +122,117 @@ Simple greeting tool for testing MCP server connectivity.
 
 ### `random-number`
 
-Generates a random number - useful for testing tool execution.
+Generates a random number within a specified range - useful for testing tool execution.
+
+**Usage**: Call through your MCP client with optional range parameters
+**Parameters**:
+
+- `min` (optional, default 1) - Minimum value (inclusive)
+- `max` (optional, default 100) - Maximum value (inclusive)
+
+**Returns**: Random number within the specified range
+
+### `debug-trello`
+
+Debug Trello API connection and credentials to troubleshoot setup issues.
+
+**Usage**: Call through your MCP client
+**Returns**: Detailed debugging information about API connection, credentials, and service status
+
+### `get-board-lists`
+
+Get all lists from the designated working board for focused board operations.
+
+**Usage**: Call through your MCP client
+**Returns**: All lists from the configured working board with details
+
+**Note**: Requires TRELLO_WORKING_BOARD_ID to be configured in environment variables
+
+### `get-all-cards-for-each-list`
+
+Get all cards for every list on the designated working board, organized by list.
+
+**Usage**: Call through your MCP client
+**Returns**: Complete overview of all cards organized by their respective lists
+
+**Note**: Requires TRELLO_WORKING_BOARD_ID to be configured in environment variables
+
+### `create-checklist`
+
+Create a new checklist for a Trello card by providing the card ID and optional checklist details.
+
+**Usage**: Call through your MCP client with `cardId` and optional parameters
+**Parameters**:
+
+- `cardId` (required) - The ID of the Trello card (24-character hexadecimal string)
+- `name` (optional) - Name for the new checklist
+- `pos` (optional) - Position of the checklist ('top', 'bottom', or number)
+
+**Returns**: Created checklist information with ID and details
+
+### `get-checklists-for-card`
+
+Get all checklists for a specific Trello card by providing the card ID.
+
+**Usage**: Call through your MCP client with `cardId` parameter
+**Parameters**:
+
+- `cardId` (required) - The ID of the Trello card (24-character hexadecimal string)
+
+**Returns**: All checklists associated with the specified card, including checklist items
+
+### `add-checklist-item`
+
+Add a new item to an existing Trello checklist by providing the checklist ID and item details.
+
+**Usage**: Call through your MCP client with `checklistId`, `name`, and optional parameters
+**Parameters**:
+
+- `checklistId` (required) - The ID of the checklist (24-character hexadecimal string)
+- `name` (required) - Name/text for the checklist item
+- `pos` (optional) - Position in the checklist ('top', 'bottom', or number)
+- `checked` (optional) - Whether the item should be checked/completed initially
+- `due` (optional) - Due date for the item in ISO 8601 format
+- `dueReminder` (optional) - Number of seconds before due date to send reminder
+- `idMember` (optional) - ID of member to assign to this checklist item
+
+**Returns**: Created checklist item with ID and details
+
+### `batch-add-checklist-items`
+
+Add multiple checklist items to an existing Trello checklist in a single batch operation. Processes items sequentially with rate limiting to avoid API overwhelm.
+
+**Usage**: Call through your MCP client with `checklistId` and `items` array
+**Parameters**:
+
+- `checklistId` (required) - The ID of the checklist (24-character hexadecimal string)
+- `items` (required) - Array of checklist items to add (minimum 1, maximum 50 items)
+
+Each item in the `items` array can have:
+- `name` (required) - Name/text for the checklist item
+- `pos` (optional) - Position in the checklist ('top', 'bottom', or number)
+- `checked` (optional) - Whether the item should be checked/completed initially
+- `due` (optional) - Due date for the item in ISO 8601 format
+- `dueReminder` (optional) - Number of seconds before due date to send reminder
+- `idMember` (optional) - ID of member to assign to this checklist item
+
+**Returns**: Batch processing results with success/failure status for each item
+
+### `update-checkitem`
+
+Update a checkitem on a Trello card by providing the card ID, checkitem ID, and update details.
+
+**Usage**: Call through your MCP client with `cardId`, `checkitemId`, and optional update parameters
+**Parameters**:
+
+- `cardId` (required) - The ID of the Trello card containing the checkitem (24-character hexadecimal string)
+- `checkitemId` (required) - The ID of the checkitem to update (24-character hexadecimal string)
+- `name` (optional) - New name for the checkitem
+- `state` (optional) - State of the checkitem ('complete' or 'incomplete')
+- `idChecklist` (optional) - ID of the checklist to move the checkitem to (24-character hexadecimal string)
+- `pos` (optional) - Position of the checkitem ('top', 'bottom', or positive number)
+
+**Returns**: Updated checkitem information with change summary
 
 ## Development
 
