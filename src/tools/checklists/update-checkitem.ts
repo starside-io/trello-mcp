@@ -31,23 +31,16 @@ const updateCheckitemTool: ToolDefinition = {
       const validationErrors: string[] = [];
 
       // Validate cardId format (24-character hexadecimal)
-      const cardIdRegex = /^[0-9a-fA-F]{24}$/;
-      if (!cardIdRegex.test(cardId)) {
+      if (!HEX_24_REGEX.test(cardId)) {
         validationErrors.push("❌ **cardId**: Invalid card ID format (Expected: 24-character hexadecimal string)");
       }
 
-      // Validate checkitemId format (24-character hexadecimal)  
-      const checkitemIdRegex = /^[0-9a-fA-F]{24}$/;
-      if (!checkitemIdRegex.test(checkitemId)) {
+      if (!HEX_24_REGEX.test(checkitemId)) {
         validationErrors.push("❌ **checkitemId**: Invalid checkitem ID format (Expected: 24-character hexadecimal string)");
       }
 
-      // Validate idChecklist format if provided
-      if (idChecklist !== undefined) {
-        const checklistIdRegex = /^[0-9a-fA-F]{24}$/;
-        if (!checklistIdRegex.test(idChecklist)) {
-          validationErrors.push("❌ **idChecklist**: Invalid checklist ID format (Expected: 24-character hexadecimal string)");
-        }
+      if (idChecklist !== undefined && !HEX_24_REGEX.test(idChecklist)) {
+        validationErrors.push("❌ **idChecklist**: Invalid checklist ID format (Expected: 24-character hexadecimal string)");
       }
 
       // Validate name length if provided
@@ -57,8 +50,13 @@ const updateCheckitemTool: ToolDefinition = {
 
       // Validate position if provided
       if (pos !== undefined) {
-        if (typeof pos === "string" && !["top", "bottom"].includes(pos)) {
-          validationErrors.push("❌ **pos**: Position must be 'top', 'bottom', or a positive number");
+        if (typeof pos === "string") {
+          if (!["top", "bottom"].includes(pos)) {
+            const parsedPos = Number(pos);
+            if (isNaN(parsedPos) || parsedPos < 0 || !Number.isInteger(parsedPos)) {
+              validationErrors.push("❌ **pos**: Position must be 'top', 'bottom', or a positive number");
+            }
+          }
         } else if (typeof pos === "number" && (pos < 0 || !Number.isInteger(pos))) {
           validationErrors.push("❌ **pos**: Position number must be a non-negative integer");
         }
