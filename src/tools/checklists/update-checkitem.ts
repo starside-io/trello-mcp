@@ -3,6 +3,9 @@ import { ToolDefinition, tools } from "../types.js";
 import { TrelloApiService } from "../../services/trello-api.js";
 import { generateToolErrorResponse } from "../../utils/trello-error-handler.js";
 
+// Regex for validating 24-character hexadecimal Trello IDs
+const HEX_24_REGEX = /^[0-9a-fA-F]{24}$/;
+
 const updateCheckitemTool: ToolDefinition = {
   name: "update-checkitem",
   description:
